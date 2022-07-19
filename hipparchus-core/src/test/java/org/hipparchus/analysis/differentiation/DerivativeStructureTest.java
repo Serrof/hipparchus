@@ -1532,6 +1532,25 @@ public class DerivativeStructureTest extends CalculusFieldElementAbstractTest<De
     }
 
     @Test
+    public void testTaylorExpansion() throws Exception {
+        final DSFactory factory = new DSFactory(1, 5);
+        final DerivativeStructure x = factory.variable(0, 1.0).sqrt();
+        final DerivativeStructure xBis = (new DerivativeStructure.TaylorExpansion(x)).buildDsEquivalent();
+        Assert.assertArrayEquals(x.getAllDerivatives(), xBis.getAllDerivatives(), 1e-20);
+    }
+
+    @Test
+    public void testComposeTaylorMap1DExp() throws Exception {
+        final DSFactory factory = new DSFactory(1, 5);
+        final DerivativeStructure x = factory.variable(0, 0.0);
+        final DerivativeStructure[] z = new DerivativeStructure[] {x.exp()};
+        final DerivativeStructure result1 = z[0].cos();
+        final DerivativeStructure y = factory.variable(0, FastMath.exp(x.getValue()));
+        final DerivativeStructure result2 = y.cos().composeWithTaylorMap(z);
+        Assert.assertArrayEquals(result1.getAllDerivatives(), result2.getAllDerivatives(), 1e-10);
+    }
+
+    @Test
     public void testField() {
         for (int maxOrder = 1; maxOrder < 5; ++maxOrder) {
             DSFactory factory = new DSFactory(3, maxOrder);
