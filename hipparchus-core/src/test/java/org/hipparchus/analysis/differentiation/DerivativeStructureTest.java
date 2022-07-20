@@ -1532,7 +1532,7 @@ public class DerivativeStructureTest extends CalculusFieldElementAbstractTest<De
     }
 
     @Test
-    public void testTaylorExpansion() throws Exception {
+    public void testTaylorExpansion() {
         final DSFactory factory = new DSFactory(1, 5);
         final DerivativeStructure x = factory.variable(0, 1.0).sqrt();
         final DerivativeStructure xBis = (new DerivativeStructure.TaylorExpansion(x)).buildDsEquivalent();
@@ -1543,10 +1543,25 @@ public class DerivativeStructureTest extends CalculusFieldElementAbstractTest<De
     public void testComposeTaylorMap1DExp() throws Exception {
         final DSFactory factory = new DSFactory(1, 5);
         final DerivativeStructure x = factory.variable(0, 0.0);
-        final DerivativeStructure[] z = new DerivativeStructure[] {x.exp()};
-        final DerivativeStructure result1 = z[0].cos();
+        final DerivativeStructure[] expXMap = new DerivativeStructure[] {x.exp()};
+        final DerivativeStructure result1 = FastMath.cos(expXMap[0]);
         final DerivativeStructure y = factory.variable(0, FastMath.exp(x.getValue()));
-        final DerivativeStructure result2 = y.cos().composeWithTaylorMap(z);
+        final DerivativeStructure result2 = y.cos().composeWithTaylorMap(expXMap);
+        Assert.assertArrayEquals(result1.getAllDerivatives(), result2.getAllDerivatives(), 1e-10);
+    }
+
+    @Test
+    public void testComposeTaylorMap2DExp() throws Exception {
+        final int order = 3;
+        final DSFactory factoryX = new DSFactory(3, order);
+        final DSFactory factoryY = new DSFactory(2, order);
+        final DerivativeStructure x1 = factoryX.variable(0, 1.0);
+        final DerivativeStructure x2 = factoryX.variable(1, 2.0);
+        final DerivativeStructure[] map2D = new DerivativeStructure[] {x1.sqrt(), x2.sin()};
+        final DerivativeStructure result1 = map2D[0].multiply(map2D[1]);
+        final DerivativeStructure y = factoryY.variable(0, map2D[0].getValue()).multiply(factoryY.variable(1,
+                map2D[1].getValue()));
+        final DerivativeStructure result2 = y.composeWithTaylorMap(map2D);
         Assert.assertArrayEquals(result1.getAllDerivatives(), result2.getAllDerivatives(), 1e-10);
     }
 

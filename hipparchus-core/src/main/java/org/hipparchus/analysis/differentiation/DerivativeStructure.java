@@ -774,6 +774,8 @@ public class DerivativeStructure implements Derivative<DerivativeStructure>, Ser
         return ds;
     }
 
+    /** Compose the present derivatives on the right with a compatible so-called Taylor map i.e. an array of other
+     * partial derivatives. The output has the same number of independent variables than the right-hand side. */
     public DerivativeStructure composeWithTaylorMap(final DerivativeStructure[] rhs) throws Exception {
 
         // sanity checks
@@ -796,15 +798,18 @@ public class DerivativeStructure implements Derivative<DerivativeStructure>, Ser
             copied.setDerivativeComponent(0, 0.);
             rhsAsExpansions[k] = new TaylorExpansion(copied);
         }
+        // turn left-hand side of composition into Taylor expansion
+        final TaylorExpansion lhsAsExpansion = new TaylorExpansion(this);
 
         // initialize quantities
         TaylorExpansion te = new TaylorExpansion(rhsFactory.constant(this.getValue()));
         TaylorExpansion[][] powers = new TaylorExpansion[rhs.length][totalOrder];  // for lazy storage of powers
 
         // compose the Taylor expansions
-        for (int j = 1; j < this.data.length; j++) {
-            if (this.data[j] != 0.) {  // filter out null terms
-                TaylorExpansion inter = new TaylorExpansion(rhsFactory.constant(this.data[j]));
+        final double[] coefficients = lhsAsExpansion.coefficients;
+        for (int j = 1; j < coefficients.length; j++) {
+            if (coefficients[j] != 0.) {  // filter out null terms
+                TaylorExpansion inter = new TaylorExpansion(rhsFactory.constant(coefficients[j]));
                 final int[] orders = this.getFactory().getCompiler().getPartialDerivativeOrders(j);
                 for (int i = 0; i < orders.length; i++) {
                     if (orders[i] != 0) {  // only consider non-trivial powers
@@ -829,6 +834,7 @@ public class DerivativeStructure implements Derivative<DerivativeStructure>, Ser
         return te.buildDsEquivalent();
     }
 
+    /** Class to map partial derivatives to corresponding Taylor expansion. This is only intended for internal use. */
     static class TaylorExpansion {
 
         /** Polynomial coefficients of the Taylor expansion in the local canonical basis. */
@@ -867,7 +873,8 @@ public class DerivativeStructure implements Derivative<DerivativeStructure>, Ser
             this.freeParameters = ds.getFreeParameters();
             this.coefficients = new double[ds.data.length];
 
-            // compute relevant factorials
+            // compute relevant factorials (would be more efficient to compute products of factorials to map Taylor
+            // expansions and partial derivatives)
             this.factorials = new double[ds.getOrder() + 1];
             Arrays.fill(this.factorials, 1.);
             for (int i = 2; i < this.factorials.length; i++) {
