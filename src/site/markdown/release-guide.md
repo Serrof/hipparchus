@@ -39,7 +39,7 @@ team can add it.
 ## Prepare Git branch for release
 
 Release will be performed on a dedicated branch, not directly on
-master. So a new branch must be created as follows and used for
+main. So a new branch must be created as follows and used for
 everything else:
 
     git branch release-X.Y
@@ -53,7 +53,7 @@ development, this version number has the form `X.Y-SNAPSHOT`. For release, the
 `-SNAPSHOT` part must be removed. On a system with Unix utilities, you can do
 it with the single following line:
 
-    for pom in pom.xml hipparchus-*/pom.xml ; do mv $pom $pom.old ; sed 's,-SNAPSHOT,,' < $pom.old > $pom ; rm $pom.old ; done
+    for pom in pom.xml hipparchus-*/pom.xml ; do sed -i 's,-SNAPSHOT,,' $pom ; done
 
 Commit the change:
 
@@ -332,12 +332,12 @@ verified and pushed:
     git tag -v X.Y
     git push --tags
 
-### Merging the release version into master
+### Merging the release version into main
 
 After the release branch has been completed, it should be merged back
-to the master branch:
+to the main branch:
 
-    git checkout master
+    git checkout main
     git merge --no-ff release-X.Y
     git push
 
@@ -377,13 +377,15 @@ The last step is to announce the release by creating a new topic in the announce
 
 ## Preparing next version
 
-After the release branch has been completed, it should be merged back to the master branch and the `pom.xml`
-must be updated with the `-SNAPSHOT`flag for the next release number. On a system with Unix utilities, you can do
-it with the single following line:
+The `pom.xml` must be updated with the `-SNAPSHOT`flag for the next release number on the develop branch.
+On a system with Unix utilities, you can do it with the single following line:
 
-    for pom in pom.xml hipparchus-*/pom.xml ; do mv $pom $pom.old ; sed 's,<version>X.Y</version>,<version>X.Z-SNAPSHOT</version>,' < $pom.old > $pom ; rm $pom.old ; done
+    git checkout develop
+    git merge --no-ff release-X.Y
+    for pom in pom.xml hipparchus-*/pom.xml ; do sed -i 's,<version>X.Y</version>,<version>X.Z-SNAPSHOT</version>,' $pom ; done
 
 Commit the change:
 
     git add pom.xml hipparchus-*/pom.xml
     git commit -m "Preparing development of next version."
+    git push
