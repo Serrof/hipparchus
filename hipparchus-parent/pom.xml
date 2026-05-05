@@ -522,8 +522,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
 
     <!-- Root Hipparchus directory so sub-modules can refer to files in the parent directory. -->
     <hipparchusParentDir>${basedir}</hipparchusParentDir>
@@ -892,7 +892,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>1.8.0</version>
+                  <version>21.0</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
